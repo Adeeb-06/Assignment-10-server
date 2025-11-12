@@ -125,6 +125,32 @@ const run = async () => {
       res.status(201).send(property);
     });
 
+
+    app.put("/properties/update/:propertyId", verifyToken, async (req, res) => {
+        const propertyId = req.params.propertyId;
+        const { propertyName, price, description, category, imgURL, location, userEmail } = req.body;
+        if (!propertyName || !price || !description || !category || !imgURL || !location || !userEmail) {
+            return res.status(400).send("Missing required fields");
+        }
+        const existingProperty = await propertiesCollection.findOne({ _id: new ObjectId(propertyId) });
+        if (!existingProperty) {
+            return res.status(401).send("Property does not exist");
+        }
+        const property = await propertiesCollection.updateOne({ _id: new ObjectId(propertyId) }, {
+            $set: {
+                propertyName,
+                price,
+                description,
+                category,
+                imgURL,
+                location,
+                userEmail,
+            }
+        });
+        res.status(201).send(property);
+    })
+
+
     app.get("/properties/:propertyId", async (req, res) => {
       const propertyId = req.params.propertyId;
       
