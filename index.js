@@ -128,7 +128,7 @@ const run = async () => {
 
     app.put("/properties/update/:propertyId", verifyToken, async (req, res) => {
         const propertyId = req.params.propertyId;
-        const { propertyName, price, description, category, imgURL, location, userEmail } = req.body;
+        const { propertyName, price, description, category, imgURL, location, userEmail , userName } = req.body;
         if (!propertyName || !price || !description || !category || !imgURL || !location || !userEmail) {
             return res.status(400).send("Missing required fields");
         }
@@ -145,6 +145,7 @@ const run = async () => {
                 imgURL,
                 location,
                 userEmail,
+                userName
             }
         });
         res.status(201).send(property);
@@ -200,7 +201,7 @@ const run = async () => {
     });
 
     app.get("/properties", async (req, res) => {
-      const properties = await propertiesCollection.find().toArray();
+      const properties = (await propertiesCollection.find().sort( { price: 1 } ).toArray());
       res.send(properties);
     });
   } catch (error) {
