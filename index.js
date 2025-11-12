@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 import admin from "firebase-admin";
 import fs from "fs";
 
@@ -40,10 +40,6 @@ const client = new MongoClient(uri, {
   },
 });
 
-app.use((req, res, next) => {
-  console.log("✅ Headers received:", req.headers);
-  next();
-});
 
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization.split(" ")[1];
@@ -124,14 +120,38 @@ const run = async () => {
         imgURL,
         location,
         userEmail,
+        createdAt: new Date(),
       });
       res.status(201).send(property);
     });
 
-    app.get("/properties/:propertyId", verifyToken, async (req, res) => {
+    app.get("/properties/:propertyId", async (req, res) => {
       const propertyId = req.params.propertyId;
-      const property = await propertiesCollection.findOne({ _id: propertyId });
+      
+      const property = await propertiesCollection.findOne({ _id: new ObjectId(propertyId) });
+
       res.send(property);
+    });
+
+    app.delete("/properties/:propertyId", verifyToken, async (req, res) => {
+      const propertyId = req.params.propertyId;
+      const { userEmail } = req.query;
+      if (!userEmail) {
+        return res.status(400).send("Missing required fields");
+      }
+      const token_email = req.token_email;
+      if (token_email !== userEmail) {
+        return res.status(401).send("Unauthorized");
+      }
+      const existingProperty = await propertiesCollection.findOne({
+        _id: new ObjectId(propertyId),
+        userEmail,
+      });
+      if (!existingProperty) {
+        return res.status(401).send("Property does not exist");
+      }
+      await propertiesCollection.deleteOne({ _id: new ObjectId(propertyId) });
+      res.send("Property deleted");
     });
 
     app.get("/my-properties", verifyToken, async (req, res) => {
