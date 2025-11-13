@@ -95,6 +95,7 @@ const run = async () => {
         imgURL,
         location,
         userEmail,
+        userName,
       } = req.body;
       if (
         !propertyName ||
@@ -121,6 +122,7 @@ const run = async () => {
         imgURL,
         location,
         userEmail,
+        userName,
         createdAt: new Date(),
       });
       res.status(201).send(property);
@@ -210,9 +212,6 @@ const run = async () => {
       const properties = (await propertiesCollection.find().sort({createdAt: -1}).limit(6).toArray());
       res.send(properties);
     });
-
-
-
 
     app.post("/review" , verifyToken, async (req, res) => {
       const { propertyId, rating, review , userEmail , reviewrName , propertyIMGURL } = req.body;
