@@ -60,6 +60,7 @@ const run = async () => {
     const db = client.db("mohammadadeeb886_db_user");
     const usersCollection = db.collection("users");
     const propertiesCollection = db.collection("properties");
+    const reviewsCollection = db.collection("reviews");
 
     app.post("/users", async (req, res) => {
       const { name, email, password, photoURL } = req.body;
@@ -204,6 +205,26 @@ const run = async () => {
       const properties = (await propertiesCollection.find().sort( { price: 1 } ).toArray());
       res.send(properties);
     });
+
+
+
+    app.post("/review" , verifyToken, async (req, res) => {
+      const { propertyId, rating, review , userEmail } = req.body;
+      if (!propertyId || !rating || !review || !userEmail) {
+        return res.status(400).send("Missing required fields");
+      }
+
+      const reviewDoc = await reviewsCollection.insertOne({
+        propertyId,
+        rating,
+        review,
+        userEmail,
+        createdAt: new Date(),
+      });
+      res.status(201).send(reviewDoc);
+    });
+
+
   } catch (error) {
     console.log(error);
   }
