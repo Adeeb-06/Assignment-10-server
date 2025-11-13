@@ -202,14 +202,20 @@ const run = async () => {
     });
 
     app.get("/properties", async (req, res) => {
-      const properties = (await propertiesCollection.find().sort( { price: 1 } ).toArray());
+      const properties = (await propertiesCollection.find().sort( { price: -1 } ).toArray());
+      res.send(properties);
+    });
+
+    app.get("/featured-properties", async (req, res) => {
+      const properties = (await propertiesCollection.find().sort({createdAt: -1}).limit(6).toArray());
       res.send(properties);
     });
 
 
 
+
     app.post("/review" , verifyToken, async (req, res) => {
-      const { propertyId, rating, review , userEmail } = req.body;
+      const { propertyId, rating, review , userEmail , reviewrName , propertyIMGURL } = req.body;
       if (!propertyId || !rating || !review || !userEmail) {
         return res.status(400).send("Missing required fields");
       }
@@ -219,9 +225,16 @@ const run = async () => {
         rating,
         review,
         userEmail,
+        reviewrName,
+        propertyIMGURL,
         createdAt: new Date(),
       });
       res.status(201).send(reviewDoc);
+    });
+
+    app.get("/reviews", verifyToken, async (req, res) => {
+      const review = await reviewsCollection.find({ userEmail: req.token_email }).toArray();
+      res.status(201).send(review);
     });
 
 
