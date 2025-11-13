@@ -4,12 +4,12 @@ import dotenv from "dotenv";
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 import admin from "firebase-admin";
 import fs from "fs";
+dotenv.config();
 
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString("utf8");
 const serviceAccount = JSON.parse(decoded);
 
 
-dotenv.config();
 
 const app = express();
 
