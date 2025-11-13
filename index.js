@@ -182,7 +182,8 @@ const run = async () => {
     });
 
     app.get("/my-properties", verifyToken, async (req, res) => {
-      const { userEmail } = req.query;
+    try {
+        const { userEmail } = req.query;
       if (!userEmail) {
         return res.status(400).send("Missing required fields");
       }
@@ -198,6 +199,9 @@ const run = async () => {
         .find({ userEmail })
         .toArray();
       res.send(properties);
+    } catch (error) {
+        return res.status(400).send(error);
+    }
     });
 
     app.get("/properties", async (req, res) => {
